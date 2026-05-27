@@ -1,0 +1,43 @@
+<div class="container py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <h1 class="h3 mb-1">Create question</h1>
+      <p class="text-muted mb-0">Add options and choose the zero-based index for the correct answer.</p>
+    </div>
+    <a class="btn btn-outline-secondary" href="/questions">Back to list</a>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form method="POST" action="/questions">
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="text">Question text</label>
+          <textarea class="form-control" id="text" name="text" rows="3" placeholder="Example: What does HTTP stand for?" required></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="options">Options</label>
+          <textarea class="form-control" id="options" name="options" rows="5" placeholder="One option per line" required></textarea>
+          <div class="form-text">You can also separate options with commas.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="correctAnswerIndex">Correct answer index</label>
+          <input class="form-control" id="correctAnswerIndex" name="correctAnswerIndex" type="number" min="0" value="0" required>
+          <div class="form-text">The first option is index 0, the second is index 1.</div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-semibold" for="keyword">Keywords</label>
+          <textarea class="form-control" id="keyword" name="keyword" rows="3" placeholder="network, http, web"></textarea>
+          <div class="form-text">Use commas or new lines for multiple keywords.</div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+          <button class="btn btn-primary" type="submit">Create question</button>
+          <a class="btn btn-outline-secondary" href="/questions">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

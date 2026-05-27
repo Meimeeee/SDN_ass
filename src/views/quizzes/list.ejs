@@ -1,0 +1,61 @@
+<div class="container py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <h1 class="h3 mb-1">Quizzes</h1>
+      <p class="text-muted mb-0">Create quiz sets and attach questions from the question bank.</p>
+    </div>
+    <a class="btn btn-primary" href="/quizzes/create">Create quiz</a>
+  </div>
+
+  <% const items = quizzes || []; %>
+
+  <% if (items.length > 0) { %>
+    <div class="card shadow-sm">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Title</th>
+              <th scope="col">Description</th>
+              <th scope="col">Questions</th>
+              <th scope="col">Updated</th>
+              <th scope="col" class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% items.forEach((quiz, index) => { %>
+              <tr>
+                <td><%= index + 1 %></td>
+                <td>
+                  <div class="fw-semibold"><%= quiz.title %></div>
+                  <small class="text-muted"><%= quiz._id %></small>
+                </td>
+                <td><%= quiz.description || "No description" %></td>
+                <td><%= (quiz.questions || []).length %> question(s)</td>
+                <td><%= quiz.updatedAt ? new Date(quiz.updatedAt).toLocaleString("vi-VN") : "N/A" %></td>
+                <td>
+                  <div class="d-flex flex-wrap justify-content-end gap-2">
+                    <a class="btn btn-sm btn-outline-primary" href="/quizzes/<%= quiz._id %>">View</a>
+                    <a class="btn btn-sm btn-outline-secondary" href="/quizzes/<%= quiz._id %>/edit">Edit</a>
+                    <form method="POST" action="/quizzes/<%= quiz._id %>?_method=DELETE" onsubmit="return confirm('Delete this quiz?');">
+                      <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="card shadow-sm">
+      <div class="card-body text-center py-5">
+        <h2 class="h5">No quizzes yet</h2>
+        <p class="text-muted">Create a quiz and connect it to your question bank.</p>
+        <a class="btn btn-primary" href="/quizzes/create">Create quiz</a>
+      </div>
+    </div>
+  <% } %>
+</div>

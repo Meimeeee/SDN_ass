@@ -1,0 +1,42 @@
+<div class="container py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <h1 class="h3 mb-1">Edit question</h1>
+      <p class="text-muted mb-0"><%= question._id %></p>
+    </div>
+    <a class="btn btn-outline-secondary" href="/questions/<%= question._id %>">Back to detail</a>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form method="POST" action="/questions/<%= question._id %>?_method=PUT">
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="text">Question text</label>
+          <textarea class="form-control" id="text" name="text" rows="3" required><%= question.text %></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="options">Options</label>
+          <textarea class="form-control" id="options" name="options" rows="5" required><%= (question.options || []).join("\n") %></textarea>
+          <div class="form-text">One option per line, or separate by commas.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="correctAnswerIndex">Correct answer index</label>
+          <input class="form-control" id="correctAnswerIndex" name="correctAnswerIndex" type="number" min="0" value="<%= question.correctAnswerIndex %>" required>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-semibold" for="keyword">Keywords</label>
+          <textarea class="form-control" id="keyword" name="keyword" rows="3"><%= (question.keyword || []).join("\n") %></textarea>
+          <div class="form-text">Use commas or new lines for multiple keywords.</div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+          <button class="btn btn-primary" type="submit">Save changes</button>
+          <a class="btn btn-outline-secondary" href="/questions/<%= question._id %>">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

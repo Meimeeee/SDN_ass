@@ -1,0 +1,70 @@
+<div class="container py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <h1 class="h3 mb-1">Question detail</h1>
+      <p class="text-muted mb-0"><%= question._id %></p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      <a class="btn btn-outline-secondary" href="/questions">Back to list</a>
+      <a class="btn btn-primary" href="/questions/<%= question._id %>/edit">Edit</a>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h5">Question</h2>
+      <p><%= question.text %></p>
+
+      <hr>
+
+      <h2 class="h5">Answer options</h2>
+      <% const options = question.options || []; %>
+      <% if (options.length > 0) { %>
+        <ol class="list-group list-group-numbered mb-4">
+          <% options.forEach((option, index) => { %>
+            <% const isCorrect = Number(index) === Number(question.correctAnswerIndex); %>
+            <li class="list-group-item d-flex justify-content-between align-items-start <%= isCorrect ? 'list-group-item-success' : '' %>">
+              <span><%= option %></span>
+              <% if (isCorrect) { %>
+                <span class="badge text-bg-success">Correct</span>
+              <% } %>
+            </li>
+          <% }) %>
+        </ol>
+      <% } else { %>
+        <p class="text-muted">No options saved.</p>
+      <% } %>
+
+      <h2 class="h5">Keywords</h2>
+      <% const keywords = question.keyword || []; %>
+      <% if (keywords.length > 0) { %>
+        <div class="mb-4">
+          <% keywords.forEach((keyword) => { %>
+            <span class="badge text-bg-info me-1 mb-1"><%= keyword %></span>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <p class="text-muted">No keywords saved.</p>
+      <% } %>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <div class="border rounded p-3 bg-light">
+            <div class="text-muted small">Created</div>
+            <div class="fw-semibold"><%= question.createdAt ? new Date(question.createdAt).toLocaleString("vi-VN") : "N/A" %></div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="border rounded p-3 bg-light">
+            <div class="text-muted small">Updated</div>
+            <div class="fw-semibold"><%= question.updatedAt ? new Date(question.updatedAt).toLocaleString("vi-VN") : "N/A" %></div>
+          </div>
+        </div>
+      </div>
+
+      <form method="POST" action="/questions/<%= question._id %>?_method=DELETE" onsubmit="return confirm('Delete this question?');">
+        <button class="btn btn-outline-danger" type="submit">Delete question</button>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,62 @@
+<div class="container py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <h1 class="h3 mb-1"><%= quiz.title %></h1>
+      <p class="text-muted mb-0"><%= quiz._id %></p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      <a class="btn btn-outline-secondary" href="/quizzes">Back to list</a>
+      <a class="btn btn-primary" href="/quizzes/<%= quiz._id %>/edit">Edit</a>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h5">Description</h2>
+      <p><%= quiz.description || "No description saved." %></p>
+
+      <div class="row g-3 my-4">
+        <div class="col-md-4">
+          <div class="border rounded p-3 bg-light">
+            <div class="text-muted small">Questions</div>
+            <div class="fw-semibold"><%= (quiz.questions || []).length %></div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="border rounded p-3 bg-light">
+            <div class="text-muted small">Created</div>
+            <div class="fw-semibold"><%= quiz.createdAt ? new Date(quiz.createdAt).toLocaleString("vi-VN") : "N/A" %></div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="border rounded p-3 bg-light">
+            <div class="text-muted small">Updated</div>
+            <div class="fw-semibold"><%= quiz.updatedAt ? new Date(quiz.updatedAt).toLocaleString("vi-VN") : "N/A" %></div>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="h5">Attached questions</h2>
+      <% const quizQuestions = quiz.questions || []; %>
+      <% if (quizQuestions.length > 0) { %>
+        <ol class="list-group list-group-numbered mb-4">
+          <% quizQuestions.forEach((question) => { %>
+            <li class="list-group-item">
+              <% if (question.text) { %>
+                <a href="/questions/<%= question._id %>"><%= question.text %></a>
+              <% } else { %>
+                <span><%= question %></span>
+              <% } %>
+            </li>
+          <% }) %>
+        </ol>
+      <% } else { %>
+        <p class="text-muted">This quiz does not have questions yet.</p>
+      <% } %>
+
+      <form method="POST" action="/quizzes/<%= quiz._id %>?_method=DELETE" onsubmit="return confirm('Delete this quiz?');">
+        <button class="btn btn-outline-danger" type="submit">Delete quiz</button>
+      </form>
+    </div>
+  </div>
+</div>

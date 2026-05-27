@@ -1,0 +1,52 @@
+<div class="container py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <h1 class="h3 mb-1">Create quiz</h1>
+      <p class="text-muted mb-0">Set the title, description, and choose questions for this quiz.</p>
+    </div>
+    <a class="btn btn-outline-secondary" href="/quizzes">Back to list</a>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form method="POST" action="/quizzes">
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="title">Title</label>
+          <input class="form-control" id="title" name="title" type="text" placeholder="Example: Web fundamentals quiz" required>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-semibold" for="description">Description</label>
+          <textarea class="form-control" id="description" name="description" rows="3" placeholder="Short note about this quiz"></textarea>
+        </div>
+
+        <fieldset class="mb-4">
+          <legend class="h5">Questions</legend>
+          <p class="text-muted">Pick questions that should appear in this quiz.</p>
+
+          <% const questionItems = questions || []; %>
+          <% if (questionItems.length > 0) { %>
+            <div class="list-group">
+              <% questionItems.forEach((question) => { %>
+                <label class="list-group-item d-flex gap-3">
+                  <input class="form-check-input flex-shrink-0" type="checkbox" name="questions" value="<%= question._id %>">
+                  <span>
+                    <span class="fw-semibold d-block"><%= question.text %></span>
+                    <small class="text-muted"><%= (question.options || []).length %> option(s)</small>
+                  </span>
+                </label>
+              <% }) %>
+            </div>
+          <% } else { %>
+            <div class="alert alert-light border mb-0">No questions available. Create questions first, then come back to attach them.</div>
+          <% } %>
+        </fieldset>
+
+        <div class="d-flex flex-wrap gap-2">
+          <button class="btn btn-primary" type="submit">Create quiz</button>
+          <a class="btn btn-outline-secondary" href="/quizzes">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
