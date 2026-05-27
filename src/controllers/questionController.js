@@ -67,7 +67,7 @@ QuestionController.delete("/:id", async (req, res) => {
       return res.status(404).json({ error: "Question not found" });
     }
 
-    return res.status(204).send();
+    return res.status(200).json({ message: "Question deleted successfully" });
   } catch (err) {
     return handleError(res, err);
   }

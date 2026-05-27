@@ -9,6 +9,7 @@ const main = express()
 // config
 main.use(express.json())
 main.use(express.urlencoded({ extended: true }))
+
 main.use("/quizzes", QuizController)
 main.use("/questions", QuestionController)
 
@@ -20,10 +21,6 @@ main.get("/", (req, res) => {
             questions: "/questions",
         },
     })
-})
-
-main.get("/hello", (req, res) => {
-    res.send("Hello world!!")
 })
 
 module.exports = main

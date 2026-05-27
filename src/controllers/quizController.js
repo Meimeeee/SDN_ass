@@ -19,6 +19,60 @@ QuizController.get("/", async (req, res) => {
   }
 });
 
+QuizController.get("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const quiz = await QuizService.getQuizById(id);
+
+    if (!quiz) {
+      return res.status(404).json({ error: "Quiz not found" });
+    }
+
+    return res.status(200).json(quiz);
+  } catch (err) {
+    return handleError(res, err);
+  }
+});
+
+QuizController.post("/", async (req, res) => {
+  try {
+    const quiz = await QuizService.createQuiz(req.body);
+    return res.status(201).json(quiz);
+  } catch (err) {
+    return handleError(res, err);
+  }
+});
+
+QuizController.put("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const quiz = await QuizService.updateQuiz(id, req.body);
+
+    if (!quiz) {
+      return res.status(404).json({ error: "Quiz not found" });
+    }
+
+    return res.status(200).json(quiz);
+  } catch (err) {
+    return handleError(res, err);
+  }
+});
+
+QuizController.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const quiz = await QuizService.deleteQuiz(id);
+
+    if (!quiz) {
+      return res.status(404).json({ error: "Quiz not found" });
+    }
+    return res.status(200).json({ message: "Quiz deleted successfully" });
+  } catch (err) {
+    return handleError(res, err);
+  }
+});
+
+
 QuizController.get("/:quizId/populate", async (req, res) => {
   try {
     const { quizId } = req.params;
@@ -72,58 +126,5 @@ QuizController.post("/:quizId/questions", async (req, res) => {
   }
 });
 
-QuizController.get("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const quiz = await QuizService.getQuizById(id);
-
-    if (!quiz) {
-      return res.status(404).json({ error: "Quiz not found" });
-    }
-
-    return res.status(200).json(quiz);
-  } catch (err) {
-    return handleError(res, err);
-  }
-});
-
-QuizController.post("/", async (req, res) => {
-  try {
-    const quiz = await QuizService.createQuiz(req.body);
-    return res.status(201).json(quiz);
-  } catch (err) {
-    return handleError(res, err);
-  }
-});
-
-QuizController.put("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const quiz = await QuizService.updateQuiz(id, req.body);
-
-    if (!quiz) {
-      return res.status(404).json({ error: "Quiz not found" });
-    }
-
-    return res.status(200).json(quiz);
-  } catch (err) {
-    return handleError(res, err);
-  }
-});
-
-QuizController.delete("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const quiz = await QuizService.deleteQuiz(id);
-
-    if (!quiz) {
-      return res.status(404).json({ error: "Quiz not found" });
-    }
-
-    return res.status(204).send();
-  } catch (err) {
-    return handleError(res, err);
-  }
-});
 
 module.exports = QuizController
