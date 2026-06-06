@@ -19,7 +19,6 @@
               <th scope="col">Question</th>
               <th scope="col">Options</th>
               <th scope="col">Correct answer</th>
-              <th scope="col">Keywords</th>
               <th scope="col" class="text-end">Actions</th>
             </tr>
           </thead>
@@ -36,15 +35,6 @@
                 </td>
                 <td><%= options.length %> option(s)</td>
                 <td><%= answer %></td>
-                <td>
-                  <% if (keywords.length > 0) { %>
-                    <% keywords.forEach((keyword) => { %>
-                      <span class="badge text-bg-info me-1 mb-1"><%= keyword %></span>
-                    <% }) %>
-                  <% } else { %>
-                    <span class="text-muted">No keywords</span>
-                  <% } %>
-                </td>
                 <td>
                   <div class="d-flex flex-wrap justify-content-end gap-2">
                     <a class="btn btn-sm btn-outline-primary" href="/questions/<%= question._id %>">View</a>

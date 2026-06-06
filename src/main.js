@@ -1,82 +1,85 @@
 // import
 const express = require("express")
-const QuizController = require("./controllers/quizController")
-const QuestionController = require("./controllers/questionController")
-const QuizViewController = require("./controllers/quizViewController")
-const QuestionViewController = require("./controllers/questionViewController")
+const routes = require("./routes")
+const apiRoutes = require("./routes/api.route")
 const methodOverride = require("method-override")
 const path = require("path")
 const fs = require("fs")
 const ejs = require("ejs")
-const Handlebars = require("handlebars")
-
+const hbs = require("hbs")
 
 // create express
 const main = express()
 
-// body parser
+const registerPartials = (partialsDir) => {
+    fs.readdirSync(partialsDir)
+        .filter((fileName) => path.extname(fileName) === ".hbs")
+        .forEach((fileName) => {
+            const partialName = path.basename(fileName, ".hbs")
+            const partialPath = path.join(partialsDir, fileName)
+            const partialContent = fs.readFileSync(partialPath, "utf-8")
+
+            hbs.handlebars.registerPartial(partialName, partialContent)
+        })
+}
+
+// view engine setup
+main.set("views", path.join(__dirname, "views"))
+main.set("view engine", "ejs")
+
+const partialsDir = path.join(__dirname, "views", "partials")
+
+// middleware
 main.use(express.json())
-main.use(express.urlencoded({ extended: true }))
-
-// Set EJS as view engine
-main.set('view engine', 'ejs');
-main.set('views', path.join(__dirname, 'views'));
-
-// method override for PUT and DELETE
+main.use(express.urlencoded({ extended: false }))
 main.use(methodOverride("_method"))
-
-// static files
 main.use(express.static(path.join(__dirname, "public")))
 
-
-// Register all partials manually
-const partialsDir = path.join(__dirname, 'views/partials');
-fs.readdirSync(partialsDir).forEach(filename => {
-    const match = /^([^.]+).hbs$/.exec(filename);
-    if (!match) return;
-
-    const name = match[1]; // 'header'
-    const template = fs.readFileSync(path.join(partialsDir, filename), 'utf8');
-    Handlebars.registerPartial(name, template);
-});
-
-// Middleware để render EJS và wrap trong HBS layout
+// render EJS page inside HBS layout
 main.use((req, res, next) => {
-    res.renderWithLayout = async function (view, data = {}) {
+    res.renderWithLayout = async function (viewPath, data = {}) {
         try {
-            // Render EJS view thành string
-            const ejsHtml = await ejs.renderFile(path.join(__dirname, 'views', `${view}.ejs`), data);
-
-            // Đọc và compile layout.hbs
-            const layoutPath = path.join(__dirname, 'views/layouts/main.hbs');
-            const layoutContent = fs.readFileSync(layoutPath, 'utf-8');
-            const layoutTemplate = Handlebars.compile(layoutContent);
-
-            // Render layout với {{body}} được thay bằng EJS output
-            const finalHtml = layoutTemplate({ ...data, body: ejsHtml });
-
-            res.send(finalHtml);
+            const ejsHtml = await ejs.renderFile(
+                path.join(__dirname, "views", `${viewPath}.ejs`),
+                data
+            )
+            registerPartials(partialsDir)
+            const layoutContent = fs.readFileSync(
+                path.join(__dirname, "views", "layouts", "main.hbs"),
+                "utf-8"
+            )
+            const layoutTemplate = hbs.handlebars.compile(layoutContent)
+            const finalHtml = layoutTemplate({ ...data, body: ejsHtml })
+            res.send(finalHtml)
         } catch (err) {
-            console.error('Render error:', err);
-            res.status(500).send('Rendering failed: ' + err.message);
+            console.error("Render error:", err)
+            res.status(500).send("Rendering failed: " + err.message)
         }
-    };
-    next();
-});
+    }
+    next()
+})
 
-
-// ===== API Routes (JSON) =====
-main.use("/api/quizzes", QuizController)
-main.use("/api/questions", QuestionController)
-
-// ===== FE Routes (HTML views) =====
-main.use("/quizzes", QuizViewController)
-main.use("/questions", QuestionViewController)
-
-// Trang chủ - chuyển hướng về danh sách quiz
+// Home page.
 main.get("/", (req, res) => {
     res.redirect("/quizzes")
 })
 
+// API routes.
+main.use("/api", apiRoutes)
+
+// UI routes.
+main.use("/", routes)
+
+// catch 404
+main.use((req, res) => {
+    res.status(404).json({ error: "Route not found" })
+})
+
+// error handler
+main.use((err, req, res, next) => {
+    res.status(err.status || 500).json({
+        error: err.message || "Internal server error"
+    })
+})
 
 module.exports = main
