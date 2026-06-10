@@ -2,13 +2,17 @@
 const express = require("express")
 const QuizController = require("./controllers/quizController")
 const QuestionController = require("./controllers/questionController")
+const passport = require("passport")
 
 // create express
 const main = express()
 
 // config
+
 main.use(express.json())
 main.use(express.urlencoded({ extended: true }))
+
+main.use(passport.initialize());
 
 main.use("/quizzes", QuizController)
 main.use("/questions", QuestionController)

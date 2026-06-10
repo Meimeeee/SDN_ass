@@ -1,5 +1,7 @@
 const { Router } = require("express");
 const QuestionService = require("../services/question.service");
+const { authenticate } = require("passport");
+const authenticateConfig = require("../auth/authenticate");
 
 const QuestionController = Router()
 
@@ -34,43 +36,54 @@ QuestionController.get("/:id", async (req, res) => {
   }
 });
 
-QuestionController.post("/", async (req, res) => {
-  try {
-    const question = await QuestionService.createQuestion(req.body);
-    return res.status(201).json(question);
-  } catch (err) {
-    return handleError(res, err);
-  }
-});
-
-QuestionController.put("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const question = await QuestionService.updateQuestion(id, req.body);
-
-    if (!question) {
-      return res.status(404).json({ error: "Question not found" });
+QuestionController.post(
+  "/",
+  authenticateConfig.verifyUser,
+  async (req, res) => {
+    try {
+      const question = await QuestionService.createQuestion(req.body);
+      return res.status(201).json(question);
+    } catch (err) {
+      return handleError(res, err);
     }
+  });
 
-    return res.status(200).json(question);
-  } catch (err) {
-    return handleError(res, err);
-  }
-});
+QuestionController.put(
+  "/:id",
+  authenticateConfig.verifyUser,
+  authenticateConfig.verifyAuthor,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const question = await QuestionService.updateQuestion(id, req.body);
 
-QuestionController.delete("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const question = await QuestionService.deleteQuestion(id);
+      if (!question) {
+        return res.status(404).json({ error: "Question not found" });
+      }
 
-    if (!question) {
-      return res.status(404).json({ error: "Question not found" });
+      return res.status(200).json(question);
+    } catch (err) {
+      return handleError(res, err);
     }
+  });
 
-    return res.status(200).json({ message: "Question deleted successfully" });
-  } catch (err) {
-    return handleError(res, err);
-  }
-});
+QuestionController.delete(
+  "/:id",
+  authenticateConfig.verifyUser,
+  authenticateConfig.verifyAuthor,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const question = await QuestionService.deleteQuestion(id);
+
+      if (!question) {
+        return res.status(404).json({ error: "Question not found" });
+      }
+
+      return res.status(200).json({ message: "Question deleted successfully" });
+    } catch (err) {
+      return handleError(res, err);
+    }
+  });
 
 module.exports = QuestionController

@@ -1,5 +1,7 @@
 const { Router } = require("express");
 const QuizService = require("../services/quiz.service");
+const { authenticate } = require("passport");
+const authenticateConfig = require("../auth/authenticate");
 
 const QuizController = Router()
 
@@ -34,47 +36,59 @@ QuizController.get("/:id", async (req, res) => {
   }
 });
 
-QuizController.post("/", async (req, res) => {
-  try {
-    const quiz = await QuizService.createQuiz(req.body);
-    return res.status(201).json(quiz);
-  } catch (err) {
-    return handleError(res, err);
-  }
-});
-
-QuizController.put("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const quiz = await QuizService.updateQuiz(id, req.body);
-
-    if (!quiz) {
-      return res.status(404).json({ error: "Quiz not found" });
+QuizController.post(
+  "/",
+  authenticateConfig.verifyUser,
+  authenticateConfig.verifyAdmin,
+  async (req, res) => {
+    try {
+      const quiz = await QuizService.createQuiz(req.body);
+      return res.status(201).json(quiz);
+    } catch (err) {
+      return handleError(res, err);
     }
+  });
 
-    return res.status(200).json(quiz);
-  } catch (err) {
-    return handleError(res, err);
-  }
-});
+QuizController.put(
+  "/:id",
+  authenticateConfig.verifyUser,
+  authenticateConfig.verifyAdmin,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const quiz = await QuizService.updateQuiz(id, req.body);
 
-QuizController.delete("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const result = await QuizService.deleteQuiz(id);
+      if (!quiz) {
+        return res.status(404).json({ error: "Quiz not found" });
+      }
 
-    if (!result) {
-      return res.status(404).json({ error: "Quiz not found" });
+      return res.status(200).json(quiz);
+    } catch (err) {
+      return handleError(res, err);
     }
-    return res.status(200).json({
-      message: "Quiz and related questions deleted successfully",
-      deletedQuiz: result.quiz,
-      deletedQuestionsCount: result.deletedQuestionsCount,
-    });
-  } catch (err) {
-    return handleError(res, err);
-  }
-});
+  });
+
+QuizController.delete(
+  "/:id",
+  authenticateConfig.verifyUser,
+  authenticateConfig.verifyAdmin,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const result = await QuizService.deleteQuiz(id);
+
+      if (!result) {
+        return res.status(404).json({ error: "Quiz not found" });
+      }
+      return res.status(200).json({
+        message: "Quiz and related questions deleted successfully",
+        deletedQuiz: result.quiz,
+        deletedQuestionsCount: result.deletedQuestionsCount,
+      });
+    } catch (err) {
+      return handleError(res, err);
+    }
+  });
 
 
 QuizController.get("/:quizId/populate", async (req, res) => {
@@ -107,28 +121,33 @@ QuizController.post("/:quizId/question", async (req, res) => {
   }
 });
 
-QuizController.post("/:quizId/questions", async (req, res) => {
-  try {
-    const { quizId } = req.params;
-    const questions = Array.isArray(req.body) ? req.body : req.body.questions;
+QuizController.post(
+  "/:quizId/questions",
+  authenticateConfig.verifyUser,
+  authenticateConfig.verifyAdmin,
+  async (req, res) => {
+    try {
+      const { quizId } = req.params;
+      const questions = Array.isArray(req.body) ? req.body : req.body.questions;
 
-    if (!Array.isArray(questions) || questions.length === 0) {
-      return res
-        .status(400)
-        .json({ error: "Request body must be an array or { questions: [] }" });
+      if (!Array.isArray(questions) || questions.length === 0) {
+        return res
+          .status(400)
+          .json({ error: "Request body must be an array or { questions: [] }" });
+      }
+
+      const quiz = await QuizService.addQuestionsToQuiz(quizId, questions);
+
+      if (!quiz) {
+        return res.status(404).json({ error: "Quiz not found" });
+      }
+
+      return res.status(201).json(quiz);
+    } catch (err) {
+      return handleError(res, err);
     }
-
-    const quiz = await QuizService.addQuestionsToQuiz(quizId, questions);
-
-    if (!quiz) {
-      return res.status(404).json({ error: "Quiz not found" });
-    }
-
-    return res.status(201).json(quiz);
-  } catch (err) {
-    return handleError(res, err);
-  }
-});
+  });
 
 
 module.exports = QuizController
+w
