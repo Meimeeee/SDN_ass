@@ -41,11 +41,12 @@ const getQuizWithQuestions = async(id) => {
     })
 }
 
-const addQuestionToQuiz = async(id, questionData) => {
+const addQuestionToQuiz = async(id, questionData, authorId) => {
     const quiz = await Quiz.findById(id)
     if(!quiz) return null
 
-    const question = await Question.create(questionData)
+    const { author, ...data } = questionData
+    const question = await Question.create({ ...data, author: authorId })
     quiz.questions.push(question._id)
 
     await quiz.save()
@@ -53,11 +54,13 @@ const addQuestionToQuiz = async(id, questionData) => {
 }
 
 
-const addQuestionsToQuiz = async(id, questions) => {
+const addQuestionsToQuiz = async(id, questions, authorId) => {
     const quiz = await Quiz.findById(id)
     if(!quiz) return null
 
-    const createQuestions = await Question.insertMany(questions)
+    const createQuestions = await Question.insertMany(
+        questions.map(({ author, ...question }) => ({ ...question, author: authorId }))
+    )
     const questionIds = createQuestions.map((q) => q._id)
     quiz.questions.push(...questionIds)
     await quiz.save()

@@ -5,11 +5,10 @@ const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
 const jwt = require("jsonwebtoken");
 
-const User = require("./models/user.model");
-const Question = require("./models/question.model");
-const ROLES = require("./constants/roles");
+const User = require("../models/user.model");
+const Question = require("../models/question.model");
 
-const JWT_SECRET = "mySecretKey";
+const JWT_SECRET = "hehe";
 
 // Cấu hình cách lấy token từ request
 const opts = {
@@ -37,7 +36,13 @@ passport.use(
 
 // Tạo JWT token sau khi login thành công
 const getToken = function (user) {
-  return jwt.sign(user, JWT_SECRET, {
+  const payload = {
+    _id: user._id,
+    username: user.username,
+    admin: user.admin,
+  };
+
+  return jwt.sign(payload, JWT_SECRET, {
     expiresIn: "1h",
   });
 };
@@ -64,7 +69,7 @@ const verifyAdmin = (req, res, next) => {
 // Middleware 3: kiểm tra có phải tác giả câu hỏi không
 const verifyAuthor = async (req, res, next) => {
   try {
-    const { questionId } = req.params;
+    const questionId = req.params.questionId || req.params.id;
 
     const question = await Question.findById(questionId);
 

@@ -106,20 +106,24 @@ QuizController.get("/:quizId/populate", async (req, res) => {
   }
 });
 
-QuizController.post("/:quizId/question", async (req, res) => {
-  try {
-    const { quizId } = req.params;
-    const quiz = await QuizService.addQuestionToQuiz(quizId, req.body);
+QuizController.post(
+  "/:quizId/question",
+  authenticateConfig.verifyUser,
+  authenticateConfig.verifyAdmin,
+  async (req, res) => {
+    try {
+      const { quizId } = req.params;
+      const quiz = await QuizService.addQuestionToQuiz(quizId, req.body, req.user._id);
 
-    if (!quiz) {
-      return res.status(404).json({ error: "Quiz not found" });
+      if (!quiz) {
+        return res.status(404).json({ error: "Quiz not found" });
+      }
+
+      return res.status(201).json(quiz);
+    } catch (err) {
+      return handleError(res, err);
     }
-
-    return res.status(201).json(quiz);
-  } catch (err) {
-    return handleError(res, err);
-  }
-});
+  });
 
 QuizController.post(
   "/:quizId/questions",
@@ -136,7 +140,7 @@ QuizController.post(
           .json({ error: "Request body must be an array or { questions: [] }" });
       }
 
-      const quiz = await QuizService.addQuestionsToQuiz(quizId, questions);
+      const quiz = await QuizService.addQuestionsToQuiz(quizId, questions, req.user._id);
 
       if (!quiz) {
         return res.status(404).json({ error: "Quiz not found" });
@@ -150,4 +154,3 @@ QuizController.post(
 
 
 module.exports = QuizController
-w

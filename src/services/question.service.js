@@ -8,12 +8,17 @@ const getQuestionById = async(id) => {
     return await Question.findById(id)
 }
 
-const createQuestion = async(data) => {
-    return await Question.create(data)
+const createQuestion = async(data, authorId) => {
+    const { author, ...questionData } = data
+    return await Question.create({ ...questionData, author: authorId })
 }
 
 const updateQuestion = async (id, data) => {
-    return await Question.findByIdAndUpdate(id, data, {new: true})
+    const { author, ...updateData } = data
+    return await Question.findByIdAndUpdate(id, updateData, {
+        new: true,
+        runValidators: true
+    })
 }
 
 const deleteQuestion = async (id) => {

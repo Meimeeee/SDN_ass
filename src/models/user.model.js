@@ -1,4 +1,5 @@
 const mongoose = require("mongoose")
+const bcrypt = require("bcryptjs")
 
 const UserSchema = new mongoose.Schema(
     {
@@ -26,13 +27,12 @@ const UserSchema = new mongoose.Schema(
 );
 
 // Mã hóa password
-UserSchema.pre("save", async function (next) {
+UserSchema.pre("save", async function () {
   if (!this.isModified("password")) {
-    return next();
+    return;
   }
 
   this.password = await bcrypt.hash(this.password, 10);
-  next();
 });
 
 // So sánh password khi login
@@ -41,4 +41,3 @@ UserSchema.methods.comparePassword = function (password) {
 };
 
 module.exports = mongoose.model("User", UserSchema);
-

@@ -41,7 +41,7 @@ QuestionController.post(
   authenticateConfig.verifyUser,
   async (req, res) => {
     try {
-      const question = await QuestionService.createQuestion(req.body);
+      const question = await QuestionService.createQuestion(req.body, req.user._id);
       return res.status(201).json(question);
     } catch (err) {
       return handleError(res, err);
