@@ -10,6 +10,31 @@ export const fetchQuizzes = createAsyncThunk("quizzes/fetchAll", async (_, { rej
   }
 });
 
+export const createQuiz = createAsyncThunk("quizzes/create", async (payload, { rejectWithValue }) => {
+  try {
+    return await quizApi.createQuiz(payload);
+  } catch (error) {
+    return rejectWithValue(getApiError(error));
+  }
+});
+
+export const updateQuiz = createAsyncThunk("quizzes/update", async ({ id, payload }, { rejectWithValue }) => {
+  try {
+    return await quizApi.updateQuiz(id, payload);
+  } catch (error) {
+    return rejectWithValue(getApiError(error));
+  }
+});
+
+export const deleteQuiz = createAsyncThunk("quizzes/delete", async (id, { rejectWithValue }) => {
+  try {
+    await quizApi.deleteQuiz(id);
+    return id;
+  } catch (error) {
+    return rejectWithValue(getApiError(error));
+  }
+});
+
 export const fetchAttemptQuiz = createAsyncThunk(
   "quizzes/fetchAttempt",
   async (quizId, { rejectWithValue }) => {
@@ -39,6 +64,7 @@ const quizSlice = createSlice({
     currentQuiz: null,
     result: null,
     loading: false,
+    saving: false,
     submitLoading: false,
     error: null,
   },
@@ -59,6 +85,42 @@ const quizSlice = createSlice({
       })
       .addCase(fetchQuizzes.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(createQuiz.pending, (state) => {
+        state.saving = true;
+        state.error = null;
+      })
+      .addCase(createQuiz.fulfilled, (state, action) => {
+        state.saving = false;
+        state.items.unshift(action.payload);
+      })
+      .addCase(createQuiz.rejected, (state, action) => {
+        state.saving = false;
+        state.error = action.payload;
+      })
+      .addCase(updateQuiz.pending, (state) => {
+        state.saving = true;
+        state.error = null;
+      })
+      .addCase(updateQuiz.fulfilled, (state, action) => {
+        state.saving = false;
+        const index = state.items.findIndex((quiz) => quiz._id === action.payload._id);
+        if (index >= 0) {
+          state.items[index] = action.payload;
+        }
+      })
+      .addCase(updateQuiz.rejected, (state, action) => {
+        state.saving = false;
+        state.error = action.payload;
+      })
+      .addCase(deleteQuiz.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(deleteQuiz.fulfilled, (state, action) => {
+        state.items = state.items.filter((quiz) => quiz._id !== action.payload);
+      })
+      .addCase(deleteQuiz.rejected, (state, action) => {
         state.error = action.payload;
       })
       .addCase(fetchAttemptQuiz.pending, (state) => {
