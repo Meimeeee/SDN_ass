@@ -1,4 +1,3 @@
-const { text } = require("express")
 const Quiz = require("../models/quiz.model")
 const Question = require("../models/question.model")
 
@@ -15,7 +14,7 @@ const createQuiz = async (data) => {
 }
 
 const updateQuiz = async (id, data) => {
-    return await Quiz.findByIdAndUpdate(id, data, { new: true })
+    return await Quiz.findByIdAndUpdate(id, data, { new: true, runValidators: true })
 }
 
 const deleteQuiz = async (id) => {
@@ -35,10 +34,56 @@ const deleteQuiz = async (id) => {
 }
 
 const getQuizWithQuestions = async(id) => {
+    return await Quiz.findById(id).populate("questions")
+}
+
+const getQuizForAttempt = async(id) => {
     return await Quiz.findById(id).populate({
         path: "questions",
-        match: {text: /capital/i}
+        select: "-correctAnswerIndex",
     })
+}
+
+const submitQuizAttempt = async(id, answers = []) => {
+    const quiz = await Quiz.findById(id).populate("questions")
+    if (!quiz) return null
+
+    const answerMap = new Map()
+    answers.forEach((answer) => {
+        if (answer && answer.questionId) {
+            answerMap.set(String(answer.questionId), Number(answer.selectedAnswerIndex))
+        }
+    })
+
+    const results = quiz.questions.map((question) => {
+        const questionId = String(question._id)
+        const hasAnswer = answerMap.has(questionId)
+        const selectedAnswerIndex = hasAnswer ? answerMap.get(questionId) : null
+        const isCorrect = hasAnswer && selectedAnswerIndex === question.correctAnswerIndex
+
+        return {
+            questionId,
+            text: question.text,
+            selectedAnswerIndex,
+            correctAnswerIndex: question.correctAnswerIndex,
+            isCorrect,
+        }
+    })
+
+    const totalQuestions = quiz.questions.length
+    const answeredCount = results.filter((result) => result.selectedAnswerIndex !== null).length
+    const correctCount = results.filter((result) => result.isCorrect).length
+    const scorePercent = totalQuestions === 0 ? 0 : Math.round((correctCount / totalQuestions) * 100)
+
+    return {
+        quizId: String(quiz._id),
+        quizTitle: quiz.title,
+        totalQuestions,
+        answeredCount,
+        correctCount,
+        scorePercent,
+        results,
+    }
 }
 
 const addQuestionToQuiz = async(id, questionData, authorId) => {
@@ -75,6 +120,8 @@ const QuizService = {
     updateQuiz,
     deleteQuiz,
     getQuizWithQuestions,
+    getQuizForAttempt,
+    submitQuizAttempt,
     addQuestionToQuiz,
     addQuestionsToQuiz
 };

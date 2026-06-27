@@ -1,6 +1,5 @@
 const { Router } = require("express");
 const QuizService = require("../services/quiz.service");
-const { authenticate } = require("passport");
 const authenticateConfig = require("../auth/authenticate");
 
 const QuizController = Router()
@@ -12,7 +11,7 @@ const handleError = (res, err) => {
   return res.status(statusCode).json({ error: err.message });
 };
 
-QuizController.get("/", async (req, res) => {
+QuizController.get("/", authenticateConfig.verifyUser, async (req, res) => {
   try {
     const quizzes = await QuizService.getAllQuizzes();
     return res.status(200).json(quizzes);
@@ -21,7 +20,7 @@ QuizController.get("/", async (req, res) => {
   }
 });
 
-QuizController.get("/:id", async (req, res) => {
+QuizController.get("/:id", authenticateConfig.verifyUser, async (req, res) => {
   try {
     const { id } = req.params;
     const quiz = await QuizService.getQuizById(id);
@@ -91,16 +90,49 @@ QuizController.delete(
   });
 
 
-QuizController.get("/:quizId/populate", async (req, res) => {
+QuizController.get("/:quizId/populate", authenticateConfig.verifyUser, async (req, res) => {
   try {
     const { quizId } = req.params;
-    const quiz = await QuizService.getQuizWithQuestions(quizId);
+    const quiz = req.user.admin
+      ? await QuizService.getQuizWithQuestions(quizId)
+      : await QuizService.getQuizForAttempt(quizId);
 
     if (!quiz) {
       return res.status(404).json({ error: "Quiz not found" });
     }
 
     return res.status(200).json(quiz);
+  } catch (err) {
+    return handleError(res, err);
+  }
+});
+
+QuizController.get("/:quizId/attempt", authenticateConfig.verifyUser, async (req, res) => {
+  try {
+    const { quizId } = req.params;
+    const quiz = await QuizService.getQuizForAttempt(quizId);
+
+    if (!quiz) {
+      return res.status(404).json({ error: "Quiz not found" });
+    }
+
+    return res.status(200).json(quiz);
+  } catch (err) {
+    return handleError(res, err);
+  }
+});
+
+QuizController.post("/:quizId/submit", authenticateConfig.verifyUser, async (req, res) => {
+  try {
+    const { quizId } = req.params;
+    const answers = Array.isArray(req.body.answers) ? req.body.answers : [];
+    const result = await QuizService.submitQuizAttempt(quizId, answers);
+
+    if (!result) {
+      return res.status(404).json({ error: "Quiz not found" });
+    }
+
+    return res.status(200).json(result);
   } catch (err) {
     return handleError(res, err);
   }

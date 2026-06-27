@@ -1,6 +1,6 @@
 "# SDN_ass" 
 
-
+BE - Nodejs (Express)
 Quiz API:
 GET     /quizzes ---- populate()
 POST    /quizzes
@@ -20,3 +20,6 @@ new API:
 GET /quizzes/:quizId/populate
 POST /quizzes/:quizId/question
 POST /quizzes/:quizId/questions
+
+FE - React:
+- Cho phép user làm quizz -> chọn answer - nộp - chấm điểm

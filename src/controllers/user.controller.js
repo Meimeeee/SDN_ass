@@ -6,6 +6,10 @@ const UserController = Router()
 
 
 const handleError = (res, err) => {
+    if (err.code === 11000) {
+        return res.status(409).json({ error: "Username already exists" });
+    }
+
     const statusCode =
         err.name === "CastError" || err.name === "ValidationError" ? 400 : 500;
 
@@ -24,6 +28,14 @@ UserController.get(
             handleError(res, err);
         }
     });
+
+UserController.get(
+    "/me",
+    authenticateConfig.verifyUser,
+    async (req, res) => {
+        return res.status(200).json(UserService.sanitizeUser(req.user));
+    }
+);
 
 UserController.get(
     "/:id",

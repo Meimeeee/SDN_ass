@@ -1,12 +1,20 @@
 const User = require('../models/user.model');
 const authenticateConfig = require("../auth/authenticate");
 
+const sanitizeUser = (user) => {
+    if (!user) return null
+
+    const data = user.toObject ? user.toObject() : { ...user }
+    delete data.password
+    return data
+}
+
 const getUsers = async () => {
-    return await User.find()
+    return await User.find().select("-password")
 }
 
 const getUserById = async (id) => {
-    return await User.findById(id)
+    return await User.findById(id).select("-password")
 }
 
 const getUserByUsername = async (username) => {
@@ -14,7 +22,8 @@ const getUserByUsername = async (username) => {
 }
 
 const register = async(data) => {
-    return await User.create(data)
+    const user = await User.create(data)
+    return sanitizeUser(user)
 }
 
 const login = async (username, password) => {
@@ -25,11 +34,11 @@ const login = async (username, password) => {
     }
 
     const token = authenticateConfig.getToken(user)
-    return { token }
+    return { token, user: sanitizeUser(user) }
 }
 
 const updateUser = async (id, data) => {
-    return await User.findByIdAndUpdate(id, data, { new: true })
+    return await User.findByIdAndUpdate(id, data, { new: true }).select("-password")
 }
 
 const deleteUser = async (id) => {
@@ -43,6 +52,7 @@ const UserService = {
     register,
     login,
     updateUser,
-    deleteUser
+    deleteUser,
+    sanitizeUser
 }
 module.exports = UserService

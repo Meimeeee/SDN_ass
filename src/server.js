@@ -8,8 +8,8 @@ async function server() {
     await connectDB()
 
     // Start the server
-    main.listen(Env.LISTEN_PORT, () => {
-        console.log(`Server is running on port ${Env.LISTEN_PORT}`)
+    main.listen(Env.PORT, "0.0.0.0", () => {
+        console.log(`Server is running on port ${Env.PORT}`)
     })
 }
 

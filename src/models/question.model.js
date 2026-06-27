@@ -14,7 +14,13 @@ const questionSchema = new mongoose.Schema(
     },
     options: {
       type: [String],
-      default: [],
+      required: true,
+      validate: {
+        validator(options) {
+          return Array.isArray(options) && options.filter(Boolean).length >= 2;
+        },
+        message: "Question must have at least 2 options",
+      },
     },
     keyword: {
       type: [String],
@@ -23,6 +29,13 @@ const questionSchema = new mongoose.Schema(
     correctAnswerIndex: {
       type: Number,
       required: true,
+      min: 0,
+      validate: {
+        validator(value) {
+          return Array.isArray(this.options) && value < this.options.length;
+        },
+        message: "Correct answer index must match an option",
+      },
     },
   },
   { timestamps: true }

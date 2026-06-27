@@ -1,17 +1,30 @@
 // import
 const express = require("express")
+const cors = require("cors")
 const QuizController = require("./controllers/quiz.controller")
 const QuestionController = require("./controllers/question.controller")
 const UserController = require("./controllers/user.controller")
 const passport = require("passport")
+const Env = require("./utils/env")
 
 // create express
 const main = express()
+const allowedOrigins = Env.CLIENT_URL.split(",").map((origin) => origin.trim()).filter(Boolean)
 
 // config
 
 main.use(express.json())
 main.use(express.urlencoded({ extended: true }))
+main.use(cors({
+    origin(origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            return callback(null, true)
+        }
+
+        return callback(new Error("Not allowed by CORS"))
+    },
+    credentials: true,
+}))
 
 main.use(passport.initialize());
 

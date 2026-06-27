@@ -7,8 +7,9 @@ const jwt = require("jsonwebtoken");
 
 const User = require("../models/user.model");
 const Question = require("../models/question.model");
+const Env = require("../utils/env");
 
-const JWT_SECRET = "hehe";
+const JWT_SECRET = Env.JWT_SECRET;
 
 // Cấu hình cách lấy token từ request
 const opts = {
@@ -66,6 +67,10 @@ const verifyAdmin = (req, res, next) => {
   return next(err);
 };
 
+const requireAuth = (req, res, next) => {
+  return verifyUser(req, res, next);
+};
+
 // Middleware 3: kiểm tra có phải tác giả câu hỏi không
 const verifyAuthor = async (req, res, next) => {
   try {
@@ -96,6 +101,7 @@ const verifyAuthor = async (req, res, next) => {
  const authenticateConfig = {
   getToken,
   verifyUser,
+  requireAuth,
   verifyAdmin,
   verifyAuthor,
 };
