@@ -94,7 +94,7 @@ export default function QuizListPage() {
       return;
     }
 
-    const ok = window.confirm(`Xóa quiz "${quiz.title}"? Các câu hỏi trong quiz cũng sẽ bị xóa.`);
+    const ok = window.confirm(`Bạn có chắc chắn muốn xóa quiz "${quiz.title}" không?`);
 
     if (ok) {
       dispatch(deleteQuiz(quiz._id));

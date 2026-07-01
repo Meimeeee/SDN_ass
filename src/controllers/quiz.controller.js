@@ -74,15 +74,15 @@ QuizController.delete(
   async (req, res) => {
     try {
       const { id } = req.params;
-      const result = await QuizService.deleteQuiz(id);
+      const quiz = await QuizService.deleteQuiz(id);
 
-      if (!result) {
+      if (!quiz) {
         return res.status(404).json({ error: "Quiz not found" });
       }
+
       return res.status(200).json({
-        message: "Quiz and related questions deleted successfully",
-        deletedQuiz: result.quiz,
-        deletedQuestionsCount: result.deletedQuestionsCount,
+        message: "Quiz deleted successfully",
+        deletedQuiz: quiz,
       });
     } catch (err) {
       return handleError(res, err);

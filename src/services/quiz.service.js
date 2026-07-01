@@ -18,19 +18,7 @@ const updateQuiz = async (id, data) => {
 }
 
 const deleteQuiz = async (id) => {
-    const quiz = await Quiz.findById(id)
-    if (!quiz) return null
-
-    const deleteQuestionsResult = await Question.deleteMany({
-        _id: { $in: quiz.questions }
-    })
-
-    await Quiz.findByIdAndDelete(id)
-
-    return {
-        quiz,
-        deletedQuestionsCount: deleteQuestionsResult.deletedCount
-    }
+    return await Quiz.findByIdAndDelete(id)
 }
 
 const getQuizWithQuestions = async(id) => {
